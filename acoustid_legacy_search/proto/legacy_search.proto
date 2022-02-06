@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message SearchResult {
+    string doc_id = 1;
+    float score = 2;
+}
+
+message SearchRequest {
+    string query = 1;
+    int32 max_results = 2;
+}
+
+message SearchResponse {
+    repeated SearchResult results = 1;
+}
+
+service LegacySearch {
+    rpc Search(SearchRequest) returns (SearchResponse);
+}
