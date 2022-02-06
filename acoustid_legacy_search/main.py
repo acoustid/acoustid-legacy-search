@@ -6,9 +6,13 @@ from contextlib import AsyncExitStack
 
 import grpc.aio
 
+from sqlalchemy.ext.asyncio import create_async_engine
+
 from acoustid_legacy_search.index import IndexClient
 from acoustid_legacy_search.service import SearchService
 from acoustid_legacy_search.proto.legacy_search_pb2_grpc import add_LegacySearchServicer_to_server
+from acoustid_legacy_search.db import FingerprintDatabaseClient
+from acoustid_legacy_search.searcher import Searcher
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +43,12 @@ async def run_search_service() -> None:
         index = await exit_stack.enter_async_context(IndexClient(index_url))
 
         db_url = os.environ.get('ACOUSTID_SEARCH_DB_URL', 'postgresql+asyncpg://acoustid:acoustid@127.0.0.1:5432/acoustid')
-        db_engine = create_async_engine(fp_db_url)
+        db_engine = create_async_engine(db_url)
         exit_stack.callback(db_engine.dispose)
         db = FingerprintDatabaseClient(db_engine)
 
-        service = SearchService(index, db)
+        searcher = Searcher(index, db)
+        service = SearchService(searcher)
         add_LegacySearchServicer_to_server(service, server)
 
         logger.info('Starting server')

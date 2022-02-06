@@ -1,11 +1,8 @@
-from typing import List, Dict, Any, NamedTuple, Optional
+from typing import List, Dict, Any, Optional
 
 from aiohttp import ClientSession
 
-
-class IndexSearchResult(NamedTuple):
-    doc_id: int
-    score: int
+from acoustid_legacy_search.types import SearchResult
 
 
 class IndexClient:
@@ -51,10 +48,10 @@ class IndexClient:
         async with self.session.post(f'/{index_name}/_bulk', json=payload) as response:
             return await response.json()
 
-    async def search(self, index_name: str, terms: List[int], timeout: Optional[float] = None) -> List[IndexSearchResult]:
+    async def search(self, index_name: str, terms: List[int], timeout: Optional[float] = None) -> List[SearchResult]:
         params = {"query": ",".join([str(t) for t in terms])}
-        async with self.session.get(f'/{index_name}/_search', params=params) as response:
+        async with self.session.get(f'/{index_name}/_search', params=params, timeout=timeout) as response:
             response.raise_for_status()
             print(response.headers)
             doc = await response.json()
-            return [IndexSearchResult(doc_id=doc['id'], score=doc['score']) for doc in doc['results']]
+            return [SearchResult(doc_id=doc['id'], score=doc['score']) for doc in doc['results']]
