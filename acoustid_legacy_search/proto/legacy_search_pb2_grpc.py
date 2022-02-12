@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from acoustid_legacy_search.proto import legacy_search_pb2 as legacy__search__pb2
+from acoustid_legacy_search.proto from acoustid_legacy_search.index.proto import legacy_search_pb2 as legacy__search__pb2
 
 
 class LegacySearchStub(object):

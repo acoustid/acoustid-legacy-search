@@ -5,23 +5,37 @@ on:
   pull_request:
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
 
+    services:
+      index:
+        image: ghcr.io/acoustid/acoustid-index:v2
+        ports:
+          - 6082/tcp
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-    - name: Install application dependencies
-      run: poetry install
-    - name: Run flake8
-      run: poetry run flake8 acoustid_legacy_search
-    - name: Run mypy
-      run: poetry run mypy acoustid_legacy_search
-    - name: Run pytest
-      run: poetry run pytest acoustid_legacy_search
+      - uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install application dependencies
+        run: poetry install
+
+      - name: Run flake8
+        run: poetry run flake8 acoustid_legacy_search
+
+      - name: Run mypy
+        run: poetry run mypy acoustid_legacy_search
+
+      - name: Run pytest
+        run: poetry run pytest acoustid_legacy_search
+        env:
+          ACOUSTID_SEARCH_TEST_INDEX_HOST: localhost
+          ACOUSTID_SEARCH_TEST_INDEX_PORT: ${{ job.services.index.port['6082'] }}
