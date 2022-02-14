@@ -2,7 +2,7 @@ import time
 from typing import List, Optional
 
 from acoustid_legacy_search.types import SearchResult
-from acoustid_legacy_search.index import IndexClient
+from acoustid_legacy_search.index.client import IndexClient
 from acoustid_legacy_search.db import FingerprintDatabaseClient
 
 DEFAULT_SEARCH_LIMIT = 100

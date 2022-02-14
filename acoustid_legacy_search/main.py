@@ -8,7 +8,7 @@ import grpc.aio
 
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from acoustid_legacy_search.index import IndexClient
+from acoustid_legacy_search.index.client import IndexClient
 from acoustid_legacy_search.service import SearchService
 from acoustid_legacy_search.proto.legacy_search_pb2_grpc import add_LegacySearchServicer_to_server
 from acoustid_legacy_search.db import FingerprintDatabaseClient
@@ -39,8 +39,9 @@ async def run_search_service() -> None:
     loop.add_signal_handler(signal.SIGTERM, stop_server)
 
     async with AsyncExitStack() as exit_stack:
-        index_url = os.environ.get('ACOUSTID_SEARCH_INDEX_URL', 'http://127.0.0.1:6081')
-        index = await exit_stack.enter_async_context(IndexClient(index_url))
+        index_host = os.environ.get('ACOUSTID_SEARCH_INDEX_HOST', 'localhost')
+        index_port = int(os.environ.get('ACOUSTID_SEARCH_INDEX_PORT', '6082'))
+        index = await exit_stack.enter_async_context(IndexClient(index_host, index_port))
 
         db_url = os.environ.get('ACOUSTID_SEARCH_DB_URL', 'postgresql+asyncpg://acoustid:acoustid@127.0.0.1:5432/acoustid')
         db_engine = create_async_engine(db_url)
